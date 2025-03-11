@@ -303,6 +303,12 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           uri: dataSource,
         );
         break;
+      case DataSourceType.contentUri:
+        dataSourceDescription = DataSource(
+          sourceType: DataSourceType.contentUri,
+          uri: dataSource,
+        );
+        break;
     }
 
     if (videoPlayerOptions?.mixWithOthers != null) {
@@ -517,7 +523,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     if (_isDisposed) {
       return;
     }
-    if (position! > value.duration!) {
+    if (position == null) {
+      return;
+    }
+    if (position > value.duration!) {
       position = value.duration;
     } else if (position < const Duration()) {
       position = const Duration();
