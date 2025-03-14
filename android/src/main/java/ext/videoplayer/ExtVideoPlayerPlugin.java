@@ -42,10 +42,12 @@ public class ExtVideoPlayerPlugin implements FlutterPlugin, VideoPlayerApi {
     this.flutterState = new FlutterState(
             binding.getApplicationContext(),
             binding.getBinaryMessenger(),
-            injector.flutterLoader()::getLookupKeyForAsset,
-            injector.flutterLoader()::getLookupKeyForAsset,
+            (asset, packageName) -> (packageName != null)
+                    ? injector.flutterLoader().getLookupKeyForAsset(asset, packageName)
+                    : injector.flutterLoader().getLookupKeyForAsset(asset),
             binding.getTextureRegistry()
     );
+
     flutterState.startListening(this, binding.getBinaryMessenger());
   }
 
@@ -158,15 +160,13 @@ public class ExtVideoPlayerPlugin implements FlutterPlugin, VideoPlayerApi {
   private static final class FlutterState {
     private final Context applicationContext;
     private final BinaryMessenger binaryMessenger;
-    private final KeyForAssetFn keyForAsset;
-    private final KeyForAssetAndPackageName keyForAssetAndPackageName;
     private final TextureRegistry textureRegistry;
+    private final AssetKeyProvider assetKeyProvider;
 
-    FlutterState(Context applicationContext, BinaryMessenger messenger, KeyForAssetFn keyForAsset, KeyForAssetAndPackageName keyForAssetAndPackageName, TextureRegistry textureRegistry) {
+    FlutterState(Context applicationContext, BinaryMessenger messenger, AssetKeyProvider assetKeyProvider, TextureRegistry textureRegistry) {
       this.applicationContext = applicationContext;
       this.binaryMessenger = messenger;
-      this.keyForAsset = keyForAsset;
-      this.keyForAssetAndPackageName = keyForAssetAndPackageName;
+      this.assetKeyProvider = assetKeyProvider;
       this.textureRegistry = textureRegistry;
     }
 
@@ -178,4 +178,10 @@ public class ExtVideoPlayerPlugin implements FlutterPlugin, VideoPlayerApi {
       VideoPlayerApi.setup(messenger, null);
     }
   }
+
+  @FunctionalInterface
+  interface AssetKeyProvider {
+    String getLookupKeyForAsset(String asset, String packageName);
+  }
+
 }
