@@ -9,45 +9,39 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath("com.android.tools.build:gradle:8.7.3")
     }
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
 
-project.getTasks().withType(JavaCompile){
-    options.compilerArgs.addAll(args)
-}
-
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 
 android {
-    compileSdk 35
-     namespace 'ext.videoplayer'
-
-    defaultConfig {
-        minSdkVersion 26
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-    lintOptions {
-        disable 'InvalidPackage'
-    }
+    compileSdk = 35
+    namespace = "ext.videoplayer"
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
+    sourceSets {
+        main.java.srcDirs += "src/main/java"
+        test.java.srcDirs += "src/test/java"
+    }
+    defaultConfig {
+        minSdk = 21
+    }
     dependencies {
         implementation 'com.google.android.exoplayer:exoplayer-core:2.19.1'
         implementation 'com.google.android.exoplayer:exoplayer-hls:2.19.1'
         implementation 'com.google.android.exoplayer:exoplayer-dash:2.19.1'
         implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.19.1'
         implementation 'com.google.android.exoplayer:extension-rtmp:2.19.1'
-        
     }
 }

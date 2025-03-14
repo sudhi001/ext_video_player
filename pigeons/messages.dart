@@ -1,4 +1,6 @@
-import 'package:pigeon/pigeon.dart';
+import 'package:pigeon/java_generator.dart';
+import 'package:pigeon/objc_generator.dart';
+import 'package:pigeon/pigeon_lib.dart';
 
 class TextureMessage {
   int? textureId;
@@ -51,8 +53,7 @@ void configurePigeon(PigeonOptions opts) {
     objcOptions: ObjcOptions(
       prefix: 'FLT',
       copyrightHeader: opts.objcOptions!.copyrightHeader,
-      headerIncludePath: opts.objcOptions!.headerIncludePath,
-      // header: opts.objcOptions!.header,
+      header: opts.objcOptions!.header,
     ),
     javaOut:
         'android/src/main/java/io/flutter/plugins/videoplayer/Messages.java',
