@@ -8,12 +8,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.Player.EventListener;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -24,9 +23,9 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
@@ -74,14 +73,9 @@ final class VideoPlayer {
     DataSource.Factory dataSourceFactory;
     if (isHTTP(uri)) {
       dataSourceFactory =
-              new DefaultHttpDataSourceFactory(
-                      "ExoPlayer",
-                      null,
-                      DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                      DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                      true);
+              new DefaultHttpDataSource.Factory();
     } else {
-      dataSourceFactory = new DefaultDataSourceFactory(context, "ExoPlayer");
+      dataSourceFactory = new DefaultDataSource.Factory(context);
     }
 
     MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
@@ -168,7 +162,13 @@ final class VideoPlayer {
     setAudioAttributes(exoPlayer, options.mixWithOthers);
 
     exoPlayer.addListener(
-            new EventListener() {
+            new Player.Listener() {
+              @Override
+              public void onPlayerError(PlaybackException error) {
+                if (eventSink != null) {
+                  eventSink.error("VideoError", "Video player had error " + error, null);
+                }
+              }
 
               @Override
               public void onPlaybackStateChanged(final int playbackState) {
@@ -186,12 +186,6 @@ final class VideoPlayer {
                 }
               }
 
-              @Override
-              public void onPlayerError(final ExoPlaybackException error) {
-                if (eventSink != null) {
-                  eventSink.error("VideoError", "Video player had error " + error, null);
-                }
-              }
             });
   }
 
